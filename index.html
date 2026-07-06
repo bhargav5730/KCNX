@@ -72,7 +72,7 @@ body { margin:0; overflow:hidden; font-family:'Segoe UI', Tahoma, Geneva, Verdan
   display: flex; flex-direction: column;
 }
 
-/* Window Chrome/Titlebar */
+/* Window Titlebar */
 .titlebar {
   background:#1a1a1e; padding:12px 16px;
   display:flex; justify-content:space-between; align-items: center;
@@ -85,7 +85,7 @@ body { margin:0; overflow:hidden; font-family:'Segoe UI', Tahoma, Geneva, Verdan
 }
 .close-btn:hover { background: #ff4a4a; color: white; }
 
-/* Global Inner App Viewport */
+/* Inner App Viewport */
 .content { flex: 1; overflow:auto; position: relative; background: #121214; }
 
 /* Modern Browser Interface GUI Design */
@@ -121,7 +121,7 @@ body { margin:0; overflow:hidden; font-family:'Segoe UI', Tahoma, Geneva, Verdan
 .bookmark-item:hover { background: rgba(255,255,255,0.05); color: #00ffcc; }
 
 .browser-viewport { flex: 1; background: #101012; position: relative; }
-.browser-iframe { width: 100%; height: 100%; border: none; background: white; }
+.browser-iframe { width: 100%; height: 100%; border: none; background: white; display: none; }
 
 .browser-home-screen {
   position: absolute; top:0; left:0; width:100%; height:100%; background: #141419;
@@ -137,11 +137,6 @@ body { margin:0; overflow:hidden; font-family:'Segoe UI', Tahoma, Geneva, Verdan
 .browser-app-card:hover { transform: translateY(-4px); border-color: #00ffcc; background: #22222c; }
 .browser-app-card .app-logo { font-size: 28px; }
 .browser-app-card span { font-size: 11px; color: #ccc; font-weight: 500; text-align: center;}
-
-.cors-warning-banner {
-  background: #2a1b1b; border-left: 4px solid #ff4a4a; padding: 10px 15px; margin-bottom: 20px;
-  border-radius: 0 6px 6px 0; font-size: 12px; color: #fcc; max-width: 470px; line-height: 1.4;
-}
 
 /* Calculator Layout */
 .calc { max-width: 280px; margin: 20px auto; padding: 15px; background: #1a1a24; border-radius: 12px; border: 1px solid #2c2c38; }
@@ -296,46 +291,40 @@ function openApp(app){
         
         <div class="browser-toolbar">
           <button class="browser-nav-btn" onclick="browserHome(this)" title="Home">🏠</button>
-          <button class="browser-nav-btn" title="Back (Simulated)">◀</button>
-          <button class="browser-nav-btn" title="Forward (Simulated)">▶</button>
-          <button class="browser-nav-btn" onclick="browserRefresh(this)" title="Refresh Frame">🔄</button>
+          <button class="browser-nav-btn" title="Back">◀</button>
+          <button class="browser-nav-btn" title="Forward">▶</button>
+          <button class="browser-nav-btn" onclick="browserRefresh(this)" title="Refresh">🔄</button>
           
           <div class="browser-address-frame">
-            <span class="address-icon">🔒</span>
-            <input class="browser-address-bar" type="text" placeholder="Search web or enter open URL address..." onkeydown="if(event.key==='Enter') browserGo(this)">
+            <span class="address-icon">🔍</span>
+            <input class="browser-address-bar" type="text" placeholder="Type wiki/maps to load inside, or search to open a new tab..." onkeydown="if(event.key==='Enter') browserRouteEngine(this)">
           </div>
         </div>
 
         <div class="browser-bookmarks">
-          <div class="bookmark-item" onclick="browserLoadUrl(this, 'https://bhargav5730.github.io/ASTRONYX-data.html/')">📝 ASTRONYX Data</div>
-          <div class="bookmark-item" onclick="browserLoadUrl(this, 'https://bing.com')">🔍 Bing Search</div>
-          <div class="bookmark-item" onclick="browserLoadUrl(this, 'https://wikipedia.org')">📚 Wikipedia</div>
+          <div class="bookmark-item" onclick="browserHandleClick(this, 'https://en.m.wikipedia.org')">📚 Wikipedia</div>
+          <div class="bookmark-item" onclick="browserHandleClick(this, 'https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d14115.115857217316!2d94.478!3d27.483!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1700000000000')">🗺️ Google Maps</div>
+          <div class="bookmark-item" onclick="browserHandleClick(this, 'https://bing.com')">🔍 Bing Search</div>
         </div>
         
         <div class="browser-viewport">
           <div class="browser-home-screen">
             <div class="browser-search-logo">KCNX<span>Navigator</span></div>
-            
-            <div class="cors-warning-banner">
-              <strong>🔒 Security Notice:</strong> Web browsers running inside frames cannot bypass native cross-origin security rules (CORS). Sites like Google/YouTube enforce block parameters on frames. Load sandbox-friendly apps below or input safe target frames!
-            </div>
 
             <div class="browser-app-grid">
-              <div class="browser-app-card" onclick="browserLoadUrl(this, 'https://bhargav5730.github.io/ASTRONYX-data.html/')">
-                <div class="app-logo">📝</div><span>Astronyx Notes</span>
-              </div>
-              <div class="browser-app-card" onclick="browserLoadUrl(this, 'https://wikipedia.org')">
+              <div class="browser-app-card" onclick="browserHandleClick(this, 'https://en.m.wikipedia.org')">
                 <div class="app-logo">🌐</div><span>Wikipedia</span>
               </div>
-              <div class="browser-app-card" onclick="browserLoadUrl(this, 'https://bing.com')">
+              <div class="browser-app-card" onclick="browserHandleClick(this, 'https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d14115.115857217316!2d94.478!3d27.483!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1700000000000')">🗺️ Maps Embed</div>
+              <div class="browser-app-card" onclick="browserHandleClick(this, 'https://bing.com')">
                 <div class="app-logo">🔍</div><span>Bing Engine</span>
               </div>
-              <div class="browser-app-card" onclick="browserLoadUrl(this, 'https://maps.google.com/maps?output=embed')">
-                <div class="app-logo">🗺️</div><span>Maps Embed</span>
+              <div class="browser-app-card" onclick="browserHandleClick(this, 'https://google.com')">
+                <div class="app-logo">✨</div><span>Google</span>
               </div>
             </div>
           </div>
-          <iframe class="browser-iframe" style="display:none;"></iframe>
+          <iframe class="browser-iframe"></iframe>
         </div>
       </div>`;
   }
@@ -348,37 +337,55 @@ function openApp(app){
   document.body.appendChild(win);
 }
 
-/* BROWSER CORE INTERCEPT ENGINE */
-function browserGo(inputElement) {
-  let targetContainer = inputElement.closest('.browser-container');
-  let url = inputElement.value.trim();
-  if(!url) return;
+/* SMART ROUTING AND CONDITIONAL IFRAME ENGINE */
+function browserRouteEngine(inputElement) {
+  let query = inputElement.value.trim().toLowerCase();
+  if(!query) return;
   
-  if(!url.startsWith("http://") && !url.startsWith("https://")) {
-    url = "https://" + url;
+  let targetContainer = inputElement.closest('.browser-container');
+  
+  // Exception Check 1: Wikipedia
+  if (query.includes("wikipedia")) {
+    loadInIframe(targetContainer, "https://en.m.wikipedia.org");
+    return;
   }
-  executeBrowserFrameLoad(targetContainer, url);
-}
-
-function browserLoadUrl(elementWithinBrowser, staticUrl) {
-  let targetContainer = elementWithinBrowser.closest('.browser-container');
-  executeBrowserFrameLoad(targetContainer, staticUrl);
-}
-
-function executeBrowserFrameLoad(container, cleanUrl) {
-  // Check if the URL points to bing.com
-  if(cleanUrl.includes("bing.com")) {
-    window.open(cleanUrl, '_blank'); // Intercept and safely redirect to a true native tab!
+  // Exception Check 2: Google Maps
+  if (query.includes("maps") || query.includes("map")) {
+    loadInIframe(targetContainer, "https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d14115.115857217316!2d94.478!3d27.483!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1700000000000");
     return;
   }
 
+  // Default: Open everything else in a completely new window/tab
+  let destinationUrl = "";
+  if (query.includes('.') && !query.includes(' ')) {
+    destinationUrl = (query.startsWith("http://") || query.startsWith("https://")) ? query : "https://" + query;
+  } else {
+    destinationUrl = "https://www.google.com/search?q=" + encodeURIComponent(query);
+  }
+  window.open(destinationUrl, '_blank');
+  inputElement.value = "";
+}
+
+function browserHandleClick(element, targetUrl) {
+  let targetContainer = element.closest('.browser-container');
+  
+  // Handle the exceptions inside iframe
+  if (targetUrl.includes("wikipedia") || targetUrl.includes("maps")) {
+    loadInIframe(targetContainer, targetUrl);
+  } else {
+    // Open standard websites externally
+    window.open(targetUrl, '_blank');
+  }
+}
+
+function loadInIframe(container, cleanUrl) {
   let addressBar = container.querySelector('.browser-address-bar');
   let homeScreen = container.querySelector('.browser-home-screen');
   let iframe = container.querySelector('.browser-iframe');
   let tabTitle = container.querySelector('.browser-tab span');
   
   addressBar.value = cleanUrl;
-  tabTitle.innerText = cleanUrl.replace('https://','').replace('http://','').split('/')[0];
+  tabTitle.innerText = cleanUrl.includes("wikipedia") ? "Wikipedia" : "Google Maps";
   
   homeScreen.style.display = "none";
   iframe.style.display = "block";
@@ -392,7 +399,7 @@ function browserHome(btnElement) {
   let iframe = container.querySelector('.browser-iframe');
   let tabTitle = container.querySelector('.browser-tab span');
   
-  addressBar.value = "";
+  if(addressBar) addressBar.value = "";
   tabTitle.innerText = "🌐 New Tab";
   iframe.src = "";
   iframe.style.display = "none";
@@ -402,7 +409,7 @@ function browserHome(btnElement) {
 function browserRefresh(btnElement) {
   let container = btnElement.closest('.browser-container');
   let iframe = container.querySelector('.browser-iframe');
-  if(iframe.style.display !== "none" && iframe.src) {
+  if(iframe && iframe.style.display !== "none" && iframe.src) {
     let currentSrc = iframe.src;
     iframe.src = '';
     iframe.src = currentSrc;
@@ -425,5 +432,5 @@ function calculate(){
 </script>
 
 </body>
-  </html>
-  
+                                                                      </html>
+    
