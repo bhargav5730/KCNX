@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>KCNX OS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
-body { margin:0; overflow:hidden; font-family:Segoe UI; background:black; color:white; }
+body { margin:0; overflow:hidden; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:black; color:white; user-select: none; }
 
-/* Boot */
+/* Boot Screen */
 #boot {
   position:fixed;width:100%;height:100%;background:black;
   display:flex;justify-content:center;align-items:center;flex-direction:column;
-  transition:opacity 2s;
+  transition:opacity 2s; z-index: 99999;
 }
-#logo { font-size:60px;letter-spacing:8px;opacity:0;transition:2s;}
-#sub {opacity:0;margin-top:10px;transition:2s;}
+#logo { font-size:60px;letter-spacing:8px;opacity:0;transition:2s; font-weight: 300;}
+#sub {opacity:0;margin-top:10px;transition:2s;color:#888;font-size:14px;}
 
 /* Topbar */
 #topbar {
@@ -24,238 +24,406 @@ body { margin:0; overflow:hidden; font-family:Segoe UI; background:black; color:
   top:0;
   width:100%;
   height:30px;
-  background:rgba(0,0,0,0.6);
+  background:rgba(10, 10, 15, 0.8);
+  backdrop-filter: blur(10px);
   justify-content:space-between;
   align-items:center;
-  padding:0 10px;
+  padding:0 15px;
   font-size:13px;
-
+  z-index: 9999;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  box-sizing: border-box;
 }
 
-/* Network */
+/* Network & Status Indicators */
+.status-group { display: flex; align-items: center; gap: 12px; }
 .bar{display:inline-block;width:3px;margin:1px;background:white}
 .b1{height:5px}.b2{height:8px}.b3{height:11px}.b4{height:14px}
+#battery{width:22px;height:11px;border:1px solid rgba(255,255,255,0.7);border-radius:2px;padding:1px;display:flex;}
+#level{height:100%;background:#00ffcc;width:100%;transition: width 0.5s, background 0.5s;}
 
-/* Battery */
-#battery{width:25px;height:10px;border:1px solid white}
-#level{height:100%;background:green;width:100%}
-
-/* Desktop */
+/* Desktop Layout */
 #desktop {
   display:none;width:100vw;height:100vh;
-  background:linear-gradient(#0a0a0a,#1e1e2f);
-  padding:40px 10px;
-  display:flex;flex-wrap:wrap;
+  background: radial-gradient(circle at center, #1b1b2f 0%, #0a0a0f 100%);
+  padding:50px 20px 20px 20px;
+  display:flex; flex-direction: row; flex-wrap:wrap; align-content: flex-start; justify-content: flex-start;
+  gap: 20px;
+  box-sizing: border-box;
+  z-index: 1;
 }
 
-/* Icons */
+/* System Desktop Icons */
 .icon {
-  width:80px;text-align:center;margin:10px;cursor:pointer;font-size:24px;
+  width:85px; padding:10px 5px; text-align:center; cursor:pointer; border-radius: 8px;
+  transition: background 0.2s, transform 0.1s;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
-.icon span {display:block;font-size:12px}
+.icon:hover { background: rgba(255, 255, 255, 0.08); transform: translateY(-2px); }
+.icon:active { transform: translateY(0); background: rgba(255, 255, 255, 0.15); }
+.icon-img { font-size: 32px; filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.3)); }
+.icon span { display:block; font-size:12px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); color: #e0e0e0; font-weight: 500;}
 
-/* Window */
+/* Main OS Window Sandbox */
 .window {
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background:#1e1e2f;
+  position:absolute; top:40px; left:20px; width:calc(100% - 40px); height:calc(100% - 60px);
+  background:#121214; z-index: 1000; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex; flex-direction: column;
 }
 
-/* Titlebar */
+/* Window Chrome/Titlebar */
 .titlebar {
-  background:#00ffcc;padding:10px;
-  display:flex;justify-content:space-between;font-weight:bold;
+  background:#1a1a1e; padding:12px 16px;
+  display:flex; justify-content:space-between; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.title-text { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; color: #00ffcc; text-transform: uppercase; }
+.close-btn { 
+  cursor: pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,0.05); font-size: 10px; transition: background 0.2s;
+}
+.close-btn:hover { background: #ff4a4a; color: white; }
+
+/* Global Inner App Viewport */
+.content { flex: 1; overflow:auto; position: relative; background: #121214; }
+
+/* Modern Browser Interface GUI Design */
+.browser-container { display: flex; flex-direction: column; height: 100%; width: 100%; background: #18181c; }
+.browser-tabs { display: flex; background: #101012; padding: 6px 10px 0 10px; gap: 4px; border-bottom: 1px solid #26262b; }
+.browser-tab { 
+  background: #1a1a1e; color: #8c8c96; padding: 8px 16px; font-size: 12px; border-radius: 8px 8px 0 0;
+  display: flex; align-items: center; gap: 8px; min-width: 140px; max-width: 200px; border: 1px solid transparent; border-bottom: none;
+}
+.browser-tab.active { background: #1c1c21; color: #fff; font-weight: 500; border-color: #26262b; position: relative; }
+
+.browser-toolbar { 
+  display: flex; align-items: center; padding: 8px 12px; background: #1c1c21; 
+  gap: 12px; border-bottom: 1px solid #26262b;
+}
+.browser-nav-btn {
+  background: none; border: none; color: #aaa; font-size: 15px; cursor: pointer;
+  width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.browser-nav-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+.browser-address-frame { flex: 1; position: relative; display: flex; align-items: center; }
+.browser-address-bar { 
+  width: 100%; background: #101012; border: 1px solid #2e2e36; color: #e0e0e0;
+  padding: 7px 15px 7px 35px; font-size: 13px; border-radius: 20px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.browser-address-bar:focus { border-color: #00ffcc; box-shadow: 0 0 0 2px rgba(0,255,204,0.15); }
+.address-icon { position: absolute; left: 12px; color: #666; font-size: 13px; }
+
+.browser-bookmarks { display: flex; gap: 15px; padding: 4px 14px; background: #18181c; border-bottom: 1px solid #26262b; font-size: 11px; color: #aaa; }
+.bookmark-item { cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 4px; }
+.bookmark-item:hover { background: rgba(255,255,255,0.05); color: #00ffcc; }
+
+.browser-viewport { flex: 1; background: #101012; position: relative; }
+.browser-iframe { width: 100%; height: 100%; border: none; background: white; }
+
+.browser-home-screen {
+  position: absolute; top:0; left:0; width:100%; height:100%; background: #141419;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; overflow-y: auto;
+}
+.browser-search-logo { font-size: 36px; font-weight: 300; margin-bottom: 20px; color: #fff; letter-spacing: 2px; }
+.browser-search-logo span { color: #00ffcc; font-weight: 700; }
+.browser-app-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 100px)); gap: 20px; justify-content: center; width: 100%; max-width: 500px; margin-top: 15px;}
+.browser-app-card {
+  background: #1c1c24; border: 1px solid #2c2c38; border-radius: 10px; padding: 15px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s;
+}
+.browser-app-card:hover { transform: translateY(-4px); border-color: #00ffcc; background: #22222c; }
+.browser-app-card .app-logo { font-size: 28px; }
+.browser-app-card span { font-size: 11px; color: #ccc; font-weight: 500; text-align: center;}
+
+.cors-warning-banner {
+  background: #2a1b1b; border-left: 4px solid #ff4a4a; padding: 10px 15px; margin-bottom: 20px;
+  border-radius: 0 6px 6px 0; font-size: 12px; color: #fcc; max-width: 470px; line-height: 1.4;
 }
 
-/* Content */
-.content {height:calc(100% - 50px);padding:10px;overflow:auto}
-
-/* Calculator */
-.calc button {
-  width:22%;height:45px;margin:2px;font-size:16px;
-}
-.calc input {
-  width:95%;height:40px;font-size:18px;margin-bottom:5px;
-}
+/* Calculator Layout */
+.calc { max-width: 280px; margin: 20px auto; padding: 15px; background: #1a1a24; border-radius: 12px; border: 1px solid #2c2c38; }
+.calc button { width: 22%; height: 45px; margin: 3px; font-size: 15px; border-radius: 6px; border: none; background: #252533; color: white; cursor: pointer; transition: background 0.1s; }
+.calc button:hover { background: #323247; }
+.calc button.op-btn { background: #2d3748; color: #00ffcc; }
+.calc button.eq-btn { background: #00ffcc; color: #121214; font-weight: bold; }
+.calc button.eq-btn:hover { background: #00e6b8; }
+.calc input { width: 96%; height: 45px; font-size: 20px; margin-bottom: 12px; background: #0f0f15; border: 1px solid #2c2c38; color: white; text-align: right; padding-right: 10px; border-radius: 6px; outline: none; }
 </style>
 </head>
 
 <body>
 
-<!-- Boot -->
 <div id="boot">
   <div id="logo">KCNX</div>
   <div id="sub">Kedlestone Cartes Normal Xenodocial</div>
 </div>
 
-<!-- Topbar -->
 <div id="topbar">
-  <div>
-    <span class="bar b1"></span>
-    <span class="bar b2"></span>
-    <span class="bar b3"></span>
-    <span class="bar b4"></span> 4G
+  <div class="status-group">
+    <div>
+      <span class="bar b1"></span>
+      <span class="bar b2"></span>
+      <span class="bar b3"></span>
+      <span class="bar b4"></span> <span style="font-weight:600;">4G</span>
+    </div>
   </div>
 
-  <div id="time"></div>
+  <div id="time" style="font-weight: 500; letter-spacing: 0.5px;">--:--</div>
 
-  <div style="display:flex;align-items:center">
+  <div class="status-group">
     <div id="battery"><div id="level"></div></div>
   </div>
 </div>
 
-<!-- Desktop -->
 <div id="desktop">
-
-<div class="icon" onclick="openApp('notepad')">📝<span>Notepad</span></div>
-<div class="icon" onclick="openApp('calc')">🧮<span>Calculator</span></div>
-<div class="icon" onclick="openApp('browser')">🌐<span>Browser</span></div>
-<div class="icon" onclick="openApp('recycle')">🗑️<span>Recycle</span></div>
-
-<div class="icon" onclick="openGames()">🎮<span>Games</span></div>
-<div class="icon" onclick="openFiles()">📁<span>Files</span></div>
-
+  <div class="icon" onclick="window.open('https://bhargav5730.github.io/ASTRONYX-data.html/', '_blank')">
+    <div class="icon-img">📝</div><span>Notepad</span>
+  </div>
+  
+  <div class="icon" onclick="openApp('calc')">
+    <div class="icon-img">🧮</div><span>Calculator</span>
+  </div>
+  
+  <div class="icon" onclick="openApp('browser')">
+    <div class="icon-img">🌐</div><span>Browser</span>
+  </div>
+  
+  <div class="icon" onclick="openApp('recycle')">
+    <div class="icon-img">🗑️</div><span>Recycle</span>
+  </div>
+  
+  <div class="icon" onclick="window.open('https://bhargav5730.github.io/ASTRONYX/', '_blank')">
+    <div class="icon-img">🛒</div><span>Store</span>
+  </div>
+  
+  <div class="icon" onclick="window.open('https://bhargav5730.github.io/kcnxPLAYER/', '_blank')">
+    <div class="icon-img">🎵</div><span>Music Player</span>
+  </div>
 </div>
 
 <audio id="audio" src="https://files.catbox.moe/qmismt.mp3"></audio>
 
 <script>
+/* System Configuration & Variables */
+const boot = document.getElementById('boot');
+const logo = document.getElementById('logo');
+const sub = document.getElementById('sub');
+const desktop = document.getElementById('desktop');
+const topbar = document.getElementById('topbar');
+const time = document.getElementById('time');
+const level = document.getElementById('level');
+const audio = document.getElementById('audio');
 
-/* Boot */
-setTimeout(()=>{logo.style.opacity=1;sub.style.opacity=1},6000);
-setTimeout(()=>boot.style.opacity=0,12000);
+setTimeout(()=>{logo.style.opacity=1;sub.style.opacity=1},1000);
+setTimeout(()=>boot.style.opacity=0,3500);
 setTimeout(()=>{
   boot.style.display="none";
   desktop.style.display="flex";
-  topbar.style.display="flex";   // 👈 ADD THIS LINE
+  topbar.style.display="flex";   
   audio.currentTime=15;
   audio.play().catch(()=>{});
-},15000);
+},4500);
 
-/* Time */
+/* Realtime Clock */
 setInterval(()=>{
-let d=new Date();
-time.innerText=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  let d=new Date();
+  time.innerText=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 },1000);
 
-/* Battery */
+/* Battery Simulation */
 let lvl=100;
 setInterval(()=>{
-lvl--; if(lvl<0) lvl=100;
-level.style.width=lvl+"%";
-
-if(lvl>50) level.style.background="green";
-else if(lvl>20) level.style.background="yellow";
-else level.style.background="red";
-
+  lvl--; if(lvl<0) lvl=100;
+  level.style.width=lvl+"%";
+  if(lvl>50) level.style.background="#00ffcc";
+  else if(lvl>20) level.style.background="#ffbb00";
+  else level.style.background="#ff4a4a";
 },5000);
 
-/* Apps */
+/* Application Window Manager Engine */
 function openApp(app){
-let win=document.createElement("div");
-win.className="window";
+  let win=document.createElement("div");
+  win.className="window";
 
-let bar=document.createElement("div");
-bar.className="titlebar";
-bar.innerHTML=app+" <span onclick='this.parentElement.parentElement.remove()'>❌</span>";
+  let bar=document.createElement("div");
+  bar.className="titlebar";
+  bar.innerHTML=`<div class='title-text'>${app}</div> <span class='close-btn' onclick='this.parentElement.parentElement.remove()'>✕</span>`;
 
-let content=document.createElement("div");
-content.className="content";
+  let content=document.createElement("div");
+  content.className="content";
 
-/* Notepad */
-if(app=="notepad"){
-content.innerHTML=`
-<button onclick="saveNote()">💾 Save</button>
-<textarea id="note" style="width:100%;height:90%"></textarea>`;
-setTimeout(()=>note.value=localStorage.note||"",100);
+  if(app=="calc"){
+    content.innerHTML=`
+      <div class="calc">
+        <input id="display" readonly><br>
+        <button class="op-btn" onclick="clearAll()">AC</button>
+        <button class="op-btn" onclick="del()">DEL</button>
+        <button class="op-btn" onclick="add('(')">(</button>
+        <button class="op-btn" onclick="add(')')">)</button><br>
+        <button onclick="add('7')">7</button>
+        <button onclick="add('8')">8</button>
+        <button onclick="add('9')">9</button>
+        <button class="op-btn" onclick="add('/')">÷</button><br>
+        <button onclick="add('4')">4</button>
+        <button onclick="add('5')">5</button>
+        <button onclick="add('6')">6</button>
+        <button class="op-btn" onclick="add('*')">×</button><br>
+        <button onclick="add('1')">1</button>
+        <button onclick="add('2')">2</button>
+        <button onclick="add('3')">3</button>
+        <button class="op-btn" onclick="add('-')">−</button><br>
+        <button onclick="add('0')">0</button>
+        <button onclick="add('.')">.</button>
+        <button class="eq-btn" onclick="calculate()">=</button>
+        <button class="op-btn" onclick="add('+')">+</button><br>
+        <button class="op-btn" onclick="add('Math.sqrt(')">√</button>
+        <button class="op-btn" onclick="add('Math.sin(')">sin</button>
+        <button class="op-btn" onclick="add('Math.cos(')">cos</button>
+        <button class="op-btn" onclick="add('Math.tan(')">tan</button>
+      </div>`;
+  }
+  else if(app=="browser"){
+    content.innerHTML = `
+      <div class="browser-container">
+        <div class="browser-tabs">
+          <div class="browser-tab active">
+            <span>🌐 New Tab</span>
+          </div>
+        </div>
+        
+        <div class="browser-toolbar">
+          <button class="browser-nav-btn" onclick="browserHome(this)" title="Home">🏠</button>
+          <button class="browser-nav-btn" title="Back (Simulated)">◀</button>
+          <button class="browser-nav-btn" title="Forward (Simulated)">▶</button>
+          <button class="browser-nav-btn" onclick="browserRefresh(this)" title="Refresh Frame">🔄</button>
+          
+          <div class="browser-address-frame">
+            <span class="address-icon">🔒</span>
+            <input class="browser-address-bar" type="text" placeholder="Search web or enter open URL address..." onkeydown="if(event.key==='Enter') browserGo(this)">
+          </div>
+        </div>
+
+        <div class="browser-bookmarks">
+          <div class="bookmark-item" onclick="browserLoadUrl(this, 'https://bhargav5730.github.io/ASTRONYX-data.html/')">📝 ASTRONYX Data</div>
+          <div class="bookmark-item" onclick="browserLoadUrl(this, 'https://bing.com')">🔍 Bing Search</div>
+          <div class="bookmark-item" onclick="browserLoadUrl(this, 'https://wikipedia.org')">📚 Wikipedia</div>
+        </div>
+        
+        <div class="browser-viewport">
+          <div class="browser-home-screen">
+            <div class="browser-search-logo">KCNX<span>Navigator</span></div>
+            
+            <div class="cors-warning-banner">
+              <strong>🔒 Security Notice:</strong> Web browsers running inside frames cannot bypass native cross-origin security rules (CORS). Sites like Google/YouTube enforce block parameters on frames. Load sandbox-friendly apps below or input safe target frames!
+            </div>
+
+            <div class="browser-app-grid">
+              <div class="browser-app-card" onclick="browserLoadUrl(this, 'https://bhargav5730.github.io/ASTRONYX-data.html/')">
+                <div class="app-logo">📝</div><span>Astronyx Notes</span>
+              </div>
+              <div class="browser-app-card" onclick="browserLoadUrl(this, 'https://wikipedia.org')">
+                <div class="app-logo">🌐</div><span>Wikipedia</span>
+              </div>
+              <div class="browser-app-card" onclick="browserLoadUrl(this, 'https://bing.com')">
+                <div class="app-logo">🔍</div><span>Bing Engine</span>
+              </div>
+              <div class="browser-app-card" onclick="browserLoadUrl(this, 'https://maps.google.com/maps?output=embed')">
+                <div class="app-logo">🗺️</div><span>Maps Embed</span>
+              </div>
+            </div>
+          </div>
+          <iframe class="browser-iframe" style="display:none;"></iframe>
+        </div>
+      </div>`;
+  }
+  else if(app=="recycle"){
+    content.innerHTML="<div style='padding:20px;'><h3>Recycle Bin</h3><p style='color:#666;'>Empty 🗑️</p></div>";
+  }
+
+  win.appendChild(bar);
+  win.appendChild(content);
+  document.body.appendChild(win);
 }
 
-/* Calculator */
-if(app=="calc"){
-content.innerHTML=`
-<div class="calc">
-<input id="display"><br>
-<button onclick="clearAll()">AC</button>
-<button onclick="del()">DEL</button>
-<button onclick="add('(')">(</button>
-<button onclick="add(')')">)</button><br>
-
-<button onclick="add('7')">7</button>
-<button onclick="add('8')">8</button>
-<button onclick="add('9')">9</button>
-<button onclick="add('/')">÷</button><br>
-
-<button onclick="add('4')">4</button>
-<button onclick="add('5')">5</button>
-<button onclick="add('6')">6</button>
-<button onclick="add('*')">×</button><br>
-
-<button onclick="add('1')">1</button>
-<button onclick="add('2')">2</button>
-<button onclick="add('3')">3</button>
-<button onclick="add('-')">−</button><br>
-
-<button onclick="add('0')">0</button>
-<button onclick="add('.')">.</button>
-<button onclick="calculate()">=</button>
-<button onclick="add('+')">+</button><br>
-
-<button onclick="add('Math.sqrt(')">√</button>
-<button onclick="add('Math.sin(')">sin</button>
-<button onclick="add('Math.cos(')">cos</button>
-<button onclick="add('Math.tan(')">tan</button>
-</div>`;
+/* BROWSER CORE INTERCEPT ENGINE */
+function browserGo(inputElement) {
+  let targetContainer = inputElement.closest('.browser-container');
+  let url = inputElement.value.trim();
+  if(!url) return;
+  
+  if(!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
+  }
+  executeBrowserFrameLoad(targetContainer, url);
 }
 
-/* Browser */
-if(app=="browser"){
-content.innerHTML=`
-<input id="url" placeholder="Enter site (google, youtube...)">
-<button onclick="go()">Go</button>`;
+function browserLoadUrl(elementWithinBrowser, staticUrl) {
+  let targetContainer = elementWithinBrowser.closest('.browser-container');
+  executeBrowserFrameLoad(targetContainer, staticUrl);
 }
 
-/* Recycle */
-if(app=="recycle"){
-content.innerHTML="<h3>Recycle Bin</h3><p>Empty 🗑️</p>";
+function executeBrowserFrameLoad(container, cleanUrl) {
+  // Check if the URL points to bing.com
+  if(cleanUrl.includes("bing.com")) {
+    window.open(cleanUrl, '_blank'); // Intercept and safely redirect to a true native tab!
+    return;
+  }
+
+  let addressBar = container.querySelector('.browser-address-bar');
+  let homeScreen = container.querySelector('.browser-home-screen');
+  let iframe = container.querySelector('.browser-iframe');
+  let tabTitle = container.querySelector('.browser-tab span');
+  
+  addressBar.value = cleanUrl;
+  tabTitle.innerText = cleanUrl.replace('https://','').replace('http://','').split('/')[0];
+  
+  homeScreen.style.display = "none";
+  iframe.style.display = "block";
+  iframe.src = cleanUrl;
 }
 
-win.appendChild(bar);
-win.appendChild(content);
-desktop.appendChild(win);
+function browserHome(btnElement) {
+  let container = btnElement.closest('.browser-container');
+  let addressBar = container.querySelector('.browser-address-bar');
+  let homeScreen = container.querySelector('.browser-home-screen');
+  let iframe = container.querySelector('.browser-iframe');
+  let tabTitle = container.querySelector('.browser-tab span');
+  
+  addressBar.value = "";
+  tabTitle.innerText = "🌐 New Tab";
+  iframe.src = "";
+  iframe.style.display = "none";
+  homeScreen.style.display = "flex";
 }
 
-/* Notepad */
-function saveNote(){
-localStorage.note=note.value;
-alert("Saved!");
+function browserRefresh(btnElement) {
+  let container = btnElement.closest('.browser-container');
+  let iframe = container.querySelector('.browser-iframe');
+  if(iframe.style.display !== "none" && iframe.src) {
+    let currentSrc = iframe.src;
+    iframe.src = '';
+    iframe.src = currentSrc;
+  }
 }
 
-/* Calculator */
-function add(v){display.value+=v;}
-function clearAll(){display.value="";}
-function del(){display.value=display.value.slice(0,-1);}
+/* Calculator Logic */
+function add(v){document.getElementById('display').value+=v;}
+function clearAll(){document.getElementById('display').value="";}
+function del(){document.getElementById('display').value=document.getElementById('display').value.slice(0,-1);}
 function calculate(){
-try{display.value=eval(display.value);}
-catch{alert("Error")}
+  try {
+    let rawInput = document.getElementById('display').value;
+    if(!rawInput) return;
+    document.getElementById('display').value=eval(rawInput);
+  } catch(e) {
+    alert("Syntax Calculation Error");
+  }
 }
-
-/* Browser */
-function go(){
-let u=url.value.trim();
-if(!u.startsWith("http")) u="https://www."+u+".com";
-window.open(u,"_blank");
-}
-
-/* External apps */
-function openGames(){
-window.open("https://kbhgames.com/engine/html5","_blank");
-}
-function openFiles(){
-window.open("https://www.xxxxxxxx.com","_blank");
-}
-
 </script>
 
 </body>
-</html>
-
-
+  </html>
+  
